@@ -1,0 +1,15 @@
+ha_ir_fan:
+  class: ha_ir_fan
+  module: ha_ir_fan
+  config:
+    discovery_topic: "discovery"
+    app_topic: "ha_ir_fan"
+    fans:
+      kitchen_fan_3:
+        power_jitter: 0.1
+        power_attribute: power
+        power_switch: switch.f1_kitchen_fan
+        remote: remote.f1_kitchen_ir
+        up_command: "b64:sgw0AA0pDSoNKiURDSomESYRJhEmESYRJhEmEQ0qDSkmESYRDSoNKQ0qDSoNKQ0qJhENKg0AAaIAAAAA"
+        down_command: "b64:shc0AAwqDSoNKiURDSolESURJRIlESURJRElEQ0qDColESURDSoMKgwqDColEQ0qDCoMKg0AAaEAAAAA"
+        power_values: [ 9,115,140,1000 ]

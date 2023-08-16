@@ -1,0 +1,3 @@
+appdaemon
+pydantic-settings
+expiringdict
