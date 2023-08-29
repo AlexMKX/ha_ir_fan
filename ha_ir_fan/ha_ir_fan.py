@@ -134,8 +134,9 @@ class ha_ir_fan(hass.Hass):
             return z
 
         def publish_state(self):
-            self.app.mq.mqtt_publish(self.discovery['state_topic'], 'ON' if self.speed > 0 else 'OFF')
-            self.app.mq.mqtt_publish(self.discovery['percentage_state_topic'], self.speed)
+            if self.speed is not None:
+                self.app.mq.mqtt_publish(self.discovery['state_topic'], 'ON' if self.speed > 0 else 'OFF')
+                self.app.mq.mqtt_publish(self.discovery['percentage_state_topic'], self.speed)
 
         def set_speed(self, speed):
             self.command_queue.append(self.Command('speed', speed))
