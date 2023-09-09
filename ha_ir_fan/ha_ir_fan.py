@@ -55,6 +55,11 @@ class RestartableTimer():
     def _onStart(self, *args) -> Any:
         return self._callback(*self._args, **self._kwargs)
 
+    def __del__(self):
+        if self._timer is not None:
+            if self._hass.timer_running(self._timer):
+                self._hass.cancel_timer(self._timer)
+
 
 class ha_ir_fan(hass.Hass):
     class irFanItem:
@@ -96,6 +101,7 @@ class ha_ir_fan(hass.Hass):
 
         def has_power_jitter(self) -> bool:
             if len(self.power_history.values()) > 0:
+                #self.app.log(self.power_history)
                 power_min = min(self.power_history.values()) + 1
                 power_max = max(self.power_history.values()) + 1
                 diff = power_max / power_min - 1
@@ -107,17 +113,20 @@ class ha_ir_fan(hass.Hass):
                 try:
                     ent = self.app.get_entity(self.fanConfig.power_switch)
                     power = ent.get_state(attribute=self.fanConfig.power_attribute)
-                    self.power_history[datetime.datetime.fromisoformat(ent.get_state(attribute='last_updated'))] = power
-                    if not self.has_power_jitter():
-                        power_updated = False
-                        if self.power != power:
-                            power_updated = True
-                        self.power = power
-                        self.power_updated = datetime.datetime.fromisoformat(
-                            ent.get_state(attribute='last_updated')).astimezone(pytz.UTC)
-                        if power_updated:
-                            self.publish_state()
-                            self.app.log("Publishing state")
+                    last_updated = str(ent.get_state(attribute='last_updated'))
+                    #self.app.log(f'Power: {power} Last Updated: {last_updated}')
+                    if power is not None and last_updated is not None:
+                        last_updated_dt = datetime.datetime.fromisoformat(last_updated)
+                        self.power_history[last_updated_dt] = power
+                        if not self.has_power_jitter():
+                            power_updated = False
+                            if self.power != power:
+                                power_updated = True
+                            self.power = power
+                            self.power_updated = last_updated_dt.astimezone(pytz.UTC)
+                            if power_updated:
+                                self.publish_state()
+                                self.app.log("Publishing state")
                 finally:
                     self.power_state_mutex.release()
 
